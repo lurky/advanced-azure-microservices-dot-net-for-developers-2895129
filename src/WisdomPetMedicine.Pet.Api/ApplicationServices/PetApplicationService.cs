@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
 using System.Net.Mime;
+using System.Runtime.Intrinsics.Arm;
 using System.Text;
 using System.Threading.Tasks;
 using WisdomPetMedicine.Common;
@@ -44,6 +45,24 @@ namespace WisdomPetMedicine.Pet.Api.ApplicationServices
                                                    configuration["ServiceBus:ConnectionString"],
                                                    configuration["ServiceBus:Adoption:TopicName"]);
 
+            });
+
+            DomainEvents.PetTransferredToHospital.Register(async c =>
+            {
+                var integrationEvent = new PetTransferedToHospitalIntegrationEvent()
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Breed = c.Breed,
+                    Sex = c.Sex,
+                    Color = c.Color,
+                    DateOfBirth = c.DateOfBirth,
+                    Species = c.Species
+                };
+
+                await PublishIntegrationEventAsync(integrationEvent,
+                                                    configuration["ServiceBus:ConnectionString"],
+                                                    configuration["ServiceBus:Hospital:TopicName"]);
             });
         }
 
